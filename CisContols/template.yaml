@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CisControls, Check inactive IAM account
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+
+  InactiveAccountsFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Description: An AWS Function to check for inactive accounts
+      Handler: app.lambda_handler
+      Runtime: python2.7
+      CodeUri: inactive_accounts/
+      Events:
+        Schedule1:
+          Type: Schedule
+          Properties:
+            Schedule: rate(1 minute)
+      MemorySize: 128
+      Timeout: 10
+      Role: !GetAtt LambdaIAMRole.Arn
+
+  LambdaIAMRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+  LambdaIAMPolicies:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: "lambda-iam-policy"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action:
+              - "iam:DeleteAccessKey"
+              - "iam:DeleteUser"
+              - "iam:GetAccessKeyLastUsed"
+              - "iam:GetUser"
+              - "iam:ListAccessKeys"
+              - "iam:ListUsers"
+              - "iam:UpdateUser"
+              - "logs:*"
+            Resource: "*"
+      Roles:
+        - Ref: "LambdaIAMRole"
+  LambdaInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Path: "/"
+      Roles:
+        - Ref: "LambdaIAMRole"
+
+
+
+
+
+      

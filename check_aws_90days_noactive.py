@@ -5,7 +5,7 @@
 #
 # You need to configure aws cli (python) with your id and secret
 # You need to install boto3 aws python sdk
-# dependencies pip install awscli boto3 pytz
+# dependencies pip install awscli boto3 
 # 
 #
 
@@ -32,7 +32,7 @@ for user in iam.users.all():
             else:
                 print "KO USER: ", user.user_name, "console access deactivated due to inactivity for more than 90 days"
                 profile.delete()
-        else:
+        else: 
             # checking for creation datetime
             createDate = profile.create_date
             timedelta = present - createDate
